@@ -7,7 +7,7 @@ import random
 
 sleepTime = 0.00
 popSize = 500
-mRate = 0.05
+mRate = 0.0
 
 class GeneticsSim :
     
@@ -21,18 +21,22 @@ class GeneticsSim :
         creatures.Creature.SIMULATOR = self
         
         global startPos
+
         global blue
         global yellow
+        global purple
+
         global target
         global vectorCount
         global fieldWidth
         global fieldHeight
         global fieldTickCount
         global tournamentSize
-        
+
         startPos = 10, self.height - 20
         blue = pygame.Color(0, 0, 255, 255)
         yellow = pygame.Color(255, 255, 0, 255)
+        purple = pygame.Color(255, 0, 255, 255)
         target = self.width - 50, 30
         #startPos = target
         vectorCount = 150
@@ -55,6 +59,7 @@ class GeneticsSim :
         simTicks = 0
         simTickMax = creatures.Creature.STEPS_PER_VEC * vectorCount
         generation = 1
+        self.bestPerformer = None
         try :
             while True :
                 for event in pygame.event.get():
@@ -73,6 +78,8 @@ class GeneticsSim :
                 self.sprite_list.update()
                 
                 self.wall_list.draw(self.screen)
+                self.wall_list.update()
+
                 pygame.draw.rect(self.screen, pygame.Color(0, 255, 0, 255), pygame.Rect(target[0], target[1], 20, 20), 0)
                 pygame.display.flip()
                 time.sleep(sleepTime)
@@ -95,6 +102,7 @@ class GeneticsSim :
             new_sprites = pygame.sprite.Group()
             fitnesses = []
             maxFit = -999999999
+            maxFitCreature = None
             sprites = self.sprite_list.sprites()
             meanFit = 0
             toRemove = []
@@ -105,10 +113,17 @@ class GeneticsSim :
                 fit = sprites[x].fitness(target)
                 if fit > maxFit :
                     maxFit = fit
+                    maxFitCreature = sprites[x]
                 fitnesses.append(fit)
                 meanFit += fit
             for x in range(0, len(toRemove)) :
                 sprites.remove(toRemove[x])
+
+            if self.bestPerformer == None or maxFit > self.bestPerformer.fitness(target):
+                if self.bestPerformer != None :
+                    self.bestPerformer.remove(self.wall_list)
+                self.bestPerformer = maxFitCreature
+                self.bestPerformer.add(self.wall_list)
             length = len(sprites)
             if length == 0 :
                 self.sprite_list.empty()
@@ -128,9 +143,13 @@ class GeneticsSim :
                 field = creatures.FlowCreature.Breed_Fields(f1, f2, mRate)
                 new_sprites.add(creatures.FlowCreature(blue, startPos[0], startPos[1], field))
             self.sprite_list.empty()
-            print len(new_sprites)
             self.sprite_list = new_sprites
             meanFit /= popSize
+            self.bestPerformer.image.fill(purple)
+            self.bestPerformer.rect.x = startPos[0]
+            self.bestPerformer.rect.y = startPos[1]
+            self.bestPerformer.floatX = startPos[0]
+            self.bestPerformer.floatY = startPos[1]
             return meanFit, maxFit
 
     def create_walls(self) :

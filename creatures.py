@@ -42,6 +42,8 @@ class FlowCreature(pygame.sprite.Sprite) :
             self.dead = True
             return
         for wall in walls :
+            if wall == FlowCreature.SIMULATOR.bestPerformer :
+                continue
             if self.rect.colliderect(wall.rect) :
                 self.image.fill(Creature.red)
                 self.dead = True
