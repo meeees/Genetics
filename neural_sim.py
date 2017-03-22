@@ -23,6 +23,7 @@ class NeuralSim :
 		self.num_food = 15
 		self.num_creatures = 50
 		self.tourn_size = 7
+		self.m_rate = 0.005
 
 		self.food_list = pygame.sprite.Group()
 		self.creature_list = pygame.sprite.Group()
@@ -92,7 +93,7 @@ class NeuralSim :
 				ps.append(olds[ind])
 				fs.append(fits[ind])
 			p1, p2 = genetics.n_parent_tournament(ps, fs)
-			new_vals = genetics.breed_floats(p1.get_genes(), p2.get_genes(), seed_rand)
+			new_vals = genetics.breed_floats(p1.get_genes(), p2.get_genes(), self.m_rate, seed_rand)
 			c.set_genes(new_vals)
 			new_creatures.add(c)
 		self.creature_list.empty()
