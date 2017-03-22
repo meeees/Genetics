@@ -3,17 +3,22 @@ import pygame
 import traceback
 import neural_creatures as creatures
 
+seed_rand = random.Random()
+
 class NeuralSim :
 
 	def __init__(self, width=640, height=480) :
 		pygame.init()
+
+		seed_rand.seed(1)
+
 		self.width = width
 		self.height = height
 		self.screen = pygame.display.set_mode((self.width, self.height))
 
 		self.food_list = pygame.sprite.Group()
 		self.creature_list = pygame.sprite.Group()
-		self.new_gen()
+		self.new_species()
 		creatures.SIMULATOR = self
 
 
@@ -28,9 +33,12 @@ class NeuralSim :
 						pygame.quit()
 						sys.exit()
 
+				self.screen.blit(self.background, (0, 0)) 
 				self.food_list.draw(self.screen)
 				self.creature_list.draw(self.screen)
+				t = time.time()
 				self.creature_list.update()
+				print time.time() - t
 				pygame.display.flip()
 
 		except Exception as e:
@@ -40,15 +48,18 @@ class NeuralSim :
 			sys.exit()
 
 
-	def new_gen(self) :
+	def new_species(self) :
 		#make some food
+		self.food_list.empty()
+		self.creature_list.empty()
 		color = pygame.Color(255, 255, 255)
 		for x in range(0, 15) :
-			f = creatures.Food(color, random.randint(10, self.width - 10), random.randint(10, self.height - 10))
+			f = creatures.Food(color, seed_rand.randint(10, self.width - 10), seed_rand.randint(10, self.height - 10))
 			self.food_list.add(f)
 		#make some creatures
-		for x in range(0, 1) :
-			c = creatures.Eater1(random.randint(10, self.width - 10), random.randint(10, self.height - 10))
+		for x in range(0, 50) :
+			c = creatures.Eater1(seed_rand.randint(10, self.width - 10), seed_rand.randint(10, self.height - 10), seed_rand)
+			c.network.randomize_weights(seed_rand)
 			self.creature_list.add(c)
 
 if __name__ == '__main__' :

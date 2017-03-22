@@ -20,16 +20,18 @@ class Eater1(pygame.sprite.Sprite) :
 	#in case playing with these values is fun
 	H_DEPTH = 2
 	H_WIDTH = 4
-	def __init__(self, x, y) :
+	def __init__(self, x, y, rand = random) :
 		pygame.sprite.Sprite.__init__(self)
 		self.width = 15
 		self.height = 15
 		self.image = pygame.Surface([self.width, self.height])
-		self.color = pygame.Color(random.randint(50, 200), random.randint(50, 200), random.randint(50, 200))
+		self.color = pygame.Color(rand.randint(50, 200), rand.randint(50, 200), rand.randint(50, 200))
 		self.image.fill(self.color)
 		self.rect = self.image.get_rect()
 		self.rect.x = x
 		self.rect.y = y
+		self.f_x = float(x)
+		self.f_y = float(y)
 		self.eaten = 0
 		self.visited = []
 		#in case we want to track this for whatever reason
@@ -46,9 +48,10 @@ class Eater1(pygame.sprite.Sprite) :
 		self.network.set_input(move_arr)
 		self.network.prop_network()
 		out = self.network.get_output()
-		print move_arr, out
-		self.rect.x += out[0]
-		self.rect.y += out[1]
+		self.f_x += out[0]
+		self.f_y += out[1]
+		self.rect.x = int(self.f_x)
+		self.rect.y = int(self.f_y)
 		#attempted moving out of bounds still counts against them
 		self.dist_moved += math.sqrt(out[0] ** 2 + out[1] ** 2)
 		self.keep_in_bounds()
@@ -78,16 +81,20 @@ class Eater1(pygame.sprite.Sprite) :
 	def keep_in_bounds(self) :
 		if(self.rect.x - self.width /2 < 0) :
 			self.rect.x = self.width / 2
+			self.f_x = float(self.rect.x)
 		if (self.rect.x + self.width / 2 > SIMULATOR.width) :
 			self.rect.x = SIMULATOR.width - self.width / 2
+			self.f_x = float(self.rect.x)
 		if (self.rect.y - self.height / 2 < 0) :
 			self.rect.y = self.height / 2
+			self.f_y = float(self.rect.y)
 		if (self.rect.y + self.height / 2 > SIMULATOR.height) :
 			self.rect.y = SIMULATOR.height - self.height / 2
+			self.f_y = float(self.rect.y)
 
 	#this means we have genetics going on, extract the color data from the last 3 values (it'd be funny if this mutated)
 	def set_genes(self, vals) :
-		self.color = pygame.Color(int(vals[-3] * 256), int(vals[-2] * 256), int(vals[-1] * 256))
+		self.color = pygame.Color(int(math.abs(vals[-3]) * 256), int(math.abs(vals[-2]) * 256), int(math.abs(vals[-1]) * 256))
 		self.image.fill(self.color)
 		self.network.import_weights(vals[:-3])
 

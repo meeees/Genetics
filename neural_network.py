@@ -13,12 +13,14 @@ class nnode :
 			node.temp_val += weight * self.value
 
 	def activate(self) :
-		self.value = 1. / (1 + (math.e ** -self.temp_val))
+		#stretching this thing to be -1 to 1
+		#self.value = (1. / (1 + (math.e ** -self.temp_val)))
+		self.value = math.tanh(self.temp_val)
 		self.temp_val = 0
 
-	def random(self, out_nodes) :
+	def randomize(self, out_nodes, rand) :
 		for x in range(0, len(out_nodes)) :
-			self.weight_list[out_nodes[x]] = random.random()
+			self.weight_list[out_nodes[x]] = rand.random() * 2 - 1
 
 	def set_weights(self, vals, out_nodes) :
 		for x in range(0, len(vals)) :
@@ -38,10 +40,10 @@ class network :
 		self.network.append([nnode() for x in range(0, oS)])
 		self.hidden_layers = hLs
 
-	def random_weights(self) :
+	def randomize_weights(self, rand = random) :
 		for x in range(0, self.hidden_layers + 1) :
 			for y in range(0, len(self.network[x])) :
-				self.network[x][y].random(self.network[x + 1])
+				self.network[x][y].randomize(self.network[x + 1], rand)
 
 	def print_network(self) :
 		for x in range(0, len(self.network)) :
