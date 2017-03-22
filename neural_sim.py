@@ -1,6 +1,7 @@
-import os, sys, time
+import random, os, sys, time
 import pygame
 import traceback
+import neural_creatures as creatures
 
 class NeuralSim :
 
@@ -10,7 +11,11 @@ class NeuralSim :
 		self.height = height
 		self.screen = pygame.display.set_mode((self.width, self.height))
 
-	def MainLoop(self) :
+		self.food_list = pygame.sprite.Group()
+		self.new_gen()
+
+
+	def main_loop(self) :
 		self.background = pygame.Surface(self.screen.get_size())
 		self.background = self.background.convert()
 		self.background.fill((0, 0, 0))
@@ -21,12 +26,23 @@ class NeuralSim :
 						pygame.quit()
 						sys.exit()
 
+				self.food_list.draw(self.screen)
+				pygame.display.flip()
+
 		except Exception as e:
 			print 'exited due to ', sys.exc_info()[0]
 			print traceback.format_exc()
 			pygame.quit()
 			sys.exit()
 
+
+	def new_gen(self) :
+		#make some food
+		color = pygame.Color(255, 255, 255)
+		for x in range(0, 20) :
+			f = creatures.Food(color, random.randint(10, self.width - 10), random.randint(10, self.height - 10))
+			self.food_list.add(f)
+
 if __name__ == '__main__' :
 	MainWindow = NeuralSim()
-	MainWindow.MainLoop()
+	MainWindow.main_loop()
