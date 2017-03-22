@@ -26,7 +26,7 @@ class nnode :
 
 
 
-class nnetwork :
+class network :
 
 	def __init__(self, iS, hS, oS, hLs = 1) :
 		self.i_size = iS
@@ -96,14 +96,14 @@ class nnetwork :
 
 #example code, shows networks can be duplicated
 """
-network = nnetwork(2, 3, 2, 1)
+network = network(2, 3, 2, 1)
 network.random_weights()
 network.set_input([0.5,0.75])
 network.prop_network()
 print network.get_output()
 
 exported = network.export_weights()
-n2 = nnetwork(2, 3, 2, 1)
+n2 = network(2, 3, 2, 1)
 n2.import_weights(exported)
 n2.set_input([0.5,0.75])
 n2.prop_network()
