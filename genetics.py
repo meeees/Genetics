@@ -39,19 +39,28 @@ def n_parent_tournament(ps, fs) :
                 topTwoVal = tmpVal
     return top, topTwo
         
+#realized I didn't need this but didn't feel like fixing stuff that may have used it
 def three_parent_tournament(p1, p2, p3, f1, f2, f3) :
-    if f1 >= f2 or f1 >= f3:
-        if f2 >= f3 :
-            return p1, p2
+    return n_parent_tournament([p1, p2, p3], [f1, f2, f3])
+
+#find worst member in a set
+def n_worst_creature(ps, fs) :
+    worst = ps[0]
+    worstVal = fs[0]
+    for x in range(1, len(ps)) :
+        if(fs[x] < worstVal) :
+            worstVal = fs[x]
+            worst = ps[x]
+    return worst
+
+def breed_floats(f1, f2, mrate, rand = random) :
+    rfs = []
+    for x in range(0, len(f1)) :
+        if(rand.random() < mrate) :
+            rfs.append(rand.random() * 2 - 1)
         else :
-            return p1, p3
-    elif f2 >= f3 :
-        if f1 >= f3 :
-            return p1, p2
-        else :
-            return p2, p3
-    else :
-        if f1 >= f2 :
-            return p1, p3
-        else :
-            return p2, p3
+            if rand.random() < 0.5 :
+                rfs.append(f1[x])
+            else :
+                rfs.append(f2[x])
+    return rfs

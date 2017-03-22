@@ -74,7 +74,7 @@ class network :
 
 	def import_weights(self, vals) :
 		if len(vals) != self.i_size * self.h_size + self.h_size * self.h_size * (self.hidden_layers - 1) +  self.h_size * self.o_size :
-			print 'Input weights length was mismatched to network size'
+			print 'Input weights length', len(vals), 'was mismatched to network size', self.i_size * self.h_size + self.h_size * self.h_size * (self.hidden_layers - 1) +  self.h_size * self.o_size
 			return
 		ind = 0
 		for x in range(0, self.hidden_layers) :

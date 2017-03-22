@@ -20,13 +20,11 @@ class Eater1(pygame.sprite.Sprite) :
 	#in case playing with these values is fun
 	H_DEPTH = 2
 	H_WIDTH = 4
-	def __init__(self, x, y, rand = random) :
+	def __init__(self, x, y) :
 		pygame.sprite.Sprite.__init__(self)
 		self.width = 15
 		self.height = 15
 		self.image = pygame.Surface([self.width, self.height])
-		self.color = pygame.Color(rand.randint(50, 200), rand.randint(50, 200), rand.randint(50, 200))
-		self.image.fill(self.color)
 		self.rect = self.image.get_rect()
 		self.rect.x = x
 		self.rect.y = y
@@ -37,6 +35,11 @@ class Eater1(pygame.sprite.Sprite) :
 		#in case we want to track this for whatever reason
 		self.dist_moved = 0
 		self.network = nn.network(2, Eater1.H_WIDTH, 2, Eater1.H_DEPTH)
+
+	def randomize(self, rand = random) :
+		self.color = pygame.Color(rand.randint(50, 200), rand.randint(50, 200), rand.randint(50, 200))
+		self.image.fill(self.color)
+		self.network.randomize_weights()
 
 	def update(self) :
 		close = self.find_closest(SIMULATOR.food_list)
@@ -79,25 +82,26 @@ class Eater1(pygame.sprite.Sprite) :
 				self.eaten += 1
 
 	def keep_in_bounds(self) :
-		if(self.rect.x - self.width /2 < 0) :
-			self.rect.x = self.width / 2
+		if(self.rect.x < 0) :
+			self.rect.x = 0
 			self.f_x = float(self.rect.x)
-		if (self.rect.x + self.width / 2 > SIMULATOR.width) :
-			self.rect.x = SIMULATOR.width - self.width / 2
+		if (self.rect.x + self.width > SIMULATOR.width) :
+			self.rect.x = SIMULATOR.width - self.width
 			self.f_x = float(self.rect.x)
-		if (self.rect.y - self.height / 2 < 0) :
-			self.rect.y = self.height / 2
+		if (self.rect.y < 0) :
+			self.rect.y = 0
 			self.f_y = float(self.rect.y)
-		if (self.rect.y + self.height / 2 > SIMULATOR.height) :
-			self.rect.y = SIMULATOR.height - self.height / 2
+		if (self.rect.y + self.height > SIMULATOR.height) :
+			self.rect.y = SIMULATOR.height - self.height
 			self.f_y = float(self.rect.y)
 
 	#this means we have genetics going on, extract the color data from the last 3 values (it'd be funny if this mutated)
 	def set_genes(self, vals) :
-		self.color = pygame.Color(int(math.abs(vals[-3]) * 256), int(math.abs(vals[-2]) * 256), int(math.abs(vals[-1]) * 256))
+		self.color = pygame.Color(int(math.fabs(vals[-3]) * 256), int(math.fabs(vals[-2]) * 256), int(math.fabs(vals[-1]) * 256))
 		self.image.fill(self.color)
 		self.network.import_weights(vals[:-3])
 
 	def get_genes(self) :
 		vals = self.network.export_weights()
-		vals.append(map(lambda x : float(x) / 256, [self.color.r, self.color.g, self.color.b]))
+		vals.extend(map(lambda x : float(x) / 256, [self.color.r, self.color.g, self.color.b]))
+		return vals
