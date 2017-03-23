@@ -39,7 +39,7 @@ class Eater1(pygame.sprite.Sprite) :
 	def randomize(self, rand = random) :
 		self.color = pygame.Color(rand.randint(50, 200), rand.randint(50, 200), rand.randint(50, 200))
 		self.image.fill(self.color)
-		self.network.randomize_weights()
+		self.network.randomize_weights(rand)
 
 	def update(self) :
 		close = self.find_closest(SIMULATOR.food_list)
