@@ -48,9 +48,7 @@ class Eater1(pygame.sprite.Sprite) :
 			move_arr = [0, 0]
 		else :
 			move_arr = [float(self.rect.x - close.rect.x) / SIMULATOR.width, float(self.rect.y - close.rect.y) / SIMULATOR.height]
-		self.network.set_input(move_arr)
-		self.network.prop_network()
-		out = self.network.get_output()
+		out = self.network.prop_input(move_arr)
 		self.f_x += out[0]
 		self.f_y += out[1]
 		self.rect.x = int(self.f_x)
