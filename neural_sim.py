@@ -3,8 +3,11 @@ import pygame
 import traceback
 import neural_creatures as creatures
 import genetics
+import numpy as np
 
-seed_rand = random.Random()
+#seed_rand = random.Random()
+#using numpy random so we can seed the networks
+seed_rand = np.random
 
 class NeuralSim :
 

@@ -64,7 +64,7 @@ class np_network :
 			res.extend(o.tolist())
 		return res
 
-	def input_weights(self, vals) :
+	def import_weights(self, vals) :
 		if len(vals) != self.i_size * self.h_size + self.h_size * self.o_size + self.h_size * self.h_size * (self.h_num - 1) :
 			print 'Input weights length', len(vals), 'was mismatched to network size', self.i_size * self.h_size + self.h_size * self.o_size + self.h_size * self.h_size * (self.h_num - 1)
 			return
@@ -82,7 +82,7 @@ if __name__ == "__main__" :
 	net_np.randomize_weights()
 	#lets make them use the same weights because why not
 	net_orig.import_weights(net_np.export_weights())
-	testCount = 10000
+	testCount = 1000
 	inps = [tuple(random.random() * 2 - 1 for x in range(0, net_np.i_size)) for x in range(0, testCount)]
 	curTime = time.time()
 	for x in range(0, testCount) :
