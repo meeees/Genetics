@@ -1,8 +1,14 @@
 import pygame
 import random, math
-import np_neural_network as nn
+
+import neural_sim
+if neural_sim.USE_NUMPY:
+	import np_neural_network as nn_np
+else :
+	import neural_network as nn
 
 SIMULATOR = None
+USE_NUMPY = neural_sim.USE_NUMPY
 
 class Food(pygame.sprite.Sprite) :
 	def __init__(self, color, x, y) :
@@ -34,7 +40,10 @@ class Eater1(pygame.sprite.Sprite) :
 		self.visited = []
 		#in case we want to track this for whatever reason
 		self.dist_moved = 0
-		self.network = nn.np_network(2, Eater1.H_WIDTH, 2, Eater1.H_DEPTH)
+		if USE_NUMPY :
+			self.network = nn_np.np_network(2, Eater1.H_WIDTH, 2, Eater1.H_DEPTH)
+		else :
+			self.network = nn.network(2, Eater1.H_WIDTH, 2, Eater1.H_DEPTH)
 
 	def randomize(self, rand = random) :
 		self.color = pygame.Color(rand.randint(50, 200), rand.randint(50, 200), rand.randint(50, 200))

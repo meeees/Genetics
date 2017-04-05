@@ -1,13 +1,17 @@
 import random, os, sys, time
 import pygame
 import traceback
-import neural_creatures as creatures
 import genetics
-import numpy as np
 
-#seed_rand = random.Random()
-#using numpy random so we can seed the networks
-seed_rand = np.random
+USE_NUMPY = True
+
+if USE_NUMPY :
+	import numpy as np
+	seed_rand = np.random
+else :
+	seed_rand = random.Random()
+
+import neural_creatures as creatures
 
 class NeuralSim :
 
@@ -28,11 +32,17 @@ class NeuralSim :
 		self.tourn_size = 7
 		self.m_rate = 0.005
 
+		self.font = pygame.font.SysFont("monospace", 12)
+		
+		self.cumul_time = 0
+		self.frames = 0
+		self.fps = 0
+		self.last_time = time.time()
+
 		self.food_list = pygame.sprite.Group()
 		self.creature_list = pygame.sprite.Group()
 		self.new_species()
 		creatures.SIMULATOR = self
-
 
 	def main_loop(self) :
 		self.background = pygame.Surface(self.screen.get_size())
@@ -49,12 +59,26 @@ class NeuralSim :
 				self.food_list.draw(self.screen)
 				self.creature_list.draw(self.screen)
 				self.creature_list.update()
+
+				fps_lab = self.font.render("FPS: " + str(self.fps), 1, (255, 255, 255))
+				self.screen.blit(fps_lab, (640 - fps_lab.get_width() - 5,460))
+
 				pygame.display.flip()
+
 				self.tick_count += 1
 				if(self.tick_count >= self.tick_count_max) :
 					print 'Generation', self.gen_count, 'Max Fitness:', self.evolve_species()
 					self.gen_count += 1
 					self.tick_count = 0
+
+				#FPS Counter
+				self.frames += 1
+				self.cumul_time += time.time() - self.last_time
+				self.last_time = time.time()
+				if self.cumul_time > 1 :
+					self.cumul_time = 0
+					self.fps = self.frames
+					self.frames = 0
 		except Exception as e:
 			print 'exited due to ', sys.exc_info()[0]
 			print traceback.format_exc()
