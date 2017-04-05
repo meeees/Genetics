@@ -16,8 +16,12 @@ class np_network :
 		pass #not entirely sure how to implement this now, maybe not necessary
 
 	def set_input(self, vals) :
+		if len(vals) != self.i_size :
+			print 'Input length was mismatched to network input size'
+			return False
 		#maybe require that a np array be passed into here for speed reasons
 		self.input = np.array(vals)
+		return True
 
 	def prop_network(self) :
 		tmp = np.dot(self.input, self.i_weights)
@@ -34,7 +38,8 @@ class np_network :
 		return self.output.tolist()
 
 	def prop_input(self, vals) :
-		self.set_input(vals)
+		if not self.set_input(vals) :
+			return None
 		self.prop_network()
 		return self.get_output()
 
@@ -44,3 +49,25 @@ class np_network :
 	def scale_random(self, val) :
 		val = val * 2 - 1
 		return val
+
+	def export_weights(self) :
+		res = []
+		for i in self.i_weights :
+			res.extend(i.tolist())
+		if self.h_weights.size > 0 :
+			for h_w in self.h_weights :
+				for h in h_w :
+					res.extend(h.tolist())
+		for o in self.o_weights :
+			res.extend(o.tolist())
+		return res
+
+	def input_weights(self, vals) :
+		if len(vals) != self.i_size * self.h_size + self.h_size * self.o_size + self.h_size * self.h_size * (self.h_num - 1) :
+			print 'Input weights length', len(vals), 'was mismatched to network size', self.i_size * self.h_size + self.h_size * self.o_size + self.h_size * self.h_size * (self.h_num - 1)
+			return
+		self.i_weights = np.array([vals[x:x+self.h_size] for x in range(0, self.i_size * self.h_size, self.h_size)])
+		vals = vals[self.i_size*self.h_size:]
+		self.h_weights = np.array([[vals[y * self.h_size * self.h_size + x:y * self.h_size * self.h_size + x+self.h_size]  for x in range(0, self.h_size * self.h_size, self.h_size)] for y in range(0, self.h_num - 1)])
+		vals = vals[self.h_size * self.h_size * (self.h_num - 1):]
+		self.o_weights = np.array([vals[x:x+ self.o_size] for x in range(0, self.h_size * self.o_size, self.o_size)])
