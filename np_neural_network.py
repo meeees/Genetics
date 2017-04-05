@@ -1,4 +1,6 @@
 import numpy as np
+import neural_network as nn
+import time, random
 
 class np_network :
 	def __init__(self, iS, hS, oS, hLs = 1) :
@@ -71,3 +73,24 @@ class np_network :
 		self.h_weights = np.array([[vals[y * self.h_size * self.h_size + x:y * self.h_size * self.h_size + x+self.h_size]  for x in range(0, self.h_size * self.h_size, self.h_size)] for y in range(0, self.h_num - 1)])
 		vals = vals[self.h_size * self.h_size * (self.h_num - 1):]
 		self.o_weights = np.array([vals[x:x+ self.o_size] for x in range(0, self.h_size * self.o_size, self.o_size)])
+
+#test speed of this network vs original network
+#only concerned with actual propogation time, not the time to generate
+if __name__ == "__main__" :
+	net_np = np_network(30, 10, 2, 2)
+	net_orig = nn.network(30, 10, 2, 2)
+	net_np.randomize_weights()
+	#lets make them use the same weights because why not
+	net_orig.import_weights(net_np.export_weights())
+	testCount = 10000
+	inps = [tuple(random.random() * 2 - 1 for x in range(0, net_np.i_size)) for x in range(0, testCount)]
+	curTime = time.time()
+	for x in range(0, testCount) :
+		net_np.prop_input(inps[x])
+	endTime = time.time()
+	print "NP Took:", endTime - curTime, 'seconds'
+	curTime = time.time()
+	for x in range(0, testCount) :
+		net_orig.prop_input(inps[x])
+	endTime = time.time()
+	print "Orig Took:", endTime - curTime, 'seconds'
