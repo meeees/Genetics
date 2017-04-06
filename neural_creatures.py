@@ -21,11 +21,13 @@ class Food(pygame.sprite.Sprite) :
 
 
 #give the creatures the relative coords of the food closest to them, output dx and dy
+#also base class for other creatures
 class Eater1(pygame.sprite.Sprite) :
 
 	#in case playing with these values is fun
 	H_DEPTH = 2
 	H_WIDTH = 4
+	I_SIZE = 2
 	def __init__(self, x, y) :
 		pygame.sprite.Sprite.__init__(self)
 		self.width = 15
@@ -40,10 +42,11 @@ class Eater1(pygame.sprite.Sprite) :
 		self.visited = []
 		#in case we want to track this for whatever reason
 		self.dist_moved = 0
+		c = self.__class__
 		if USE_NUMPY :
-			self.network = nn_np.np_network(2, Eater1.H_WIDTH, 2, Eater1.H_DEPTH)
+			self.network = nn_np.np_network(c.I_SIZE, c.H_WIDTH, 2, c.H_DEPTH)
 		else :
-			self.network = nn.network(2, Eater1.H_WIDTH, 2, Eater1.H_DEPTH)
+			self.network = nn.network(c.I_SIZE, c.H_WIDTH, 2, c.H_DEPTH)
 
 	def randomize(self, rand = random) :
 		self.color = pygame.Color(rand.randint(50, 200), rand.randint(50, 200), rand.randint(50, 200))
@@ -51,13 +54,21 @@ class Eater1(pygame.sprite.Sprite) :
 		self.network.randomize_weights(rand)
 
 	def update(self) :
+		self.update_always(self.get_net_inp())
+
+	#this function will need to be overridden by child classes that use different input methods
+	def get_net_inp(self) :
 		close = self.find_closest(SIMULATOR.food_list)
 		#if they already ate everything, will probably make them stop moving atm?
 		if close == None :
 			move_arr = [0, 0]
 		else :
 			move_arr = [float(self.rect.x - close.rect.x) / SIMULATOR.width, float(self.rect.y - close.rect.y) / SIMULATOR.height]
-		out = self.network.prop_input(move_arr)
+		return move_arr
+
+	#assume the output will always be just a way to move
+	def update_always(self, net_in) :
+		out = self.network.prop_input(net_in)
 		self.f_x += out[0]
 		self.f_y += out[1]
 		self.rect.x = int(self.f_x)
@@ -66,7 +77,6 @@ class Eater1(pygame.sprite.Sprite) :
 		self.dist_moved += math.sqrt(out[0] ** 2 + out[1] ** 2)
 		self.keep_in_bounds()
 		self.check_collisions(SIMULATOR.food_list)
-
 
 	def find_closest(self, others) :
 		closest = None
