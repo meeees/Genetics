@@ -10,7 +10,7 @@ else :
 SIMULATOR = None
 USE_NUMPY = neural_sim.USE_NUMPY
 
-class Food(pygame.sprite.Sprite) :
+class Food(pygame.sprite.Sprite) : 
 	def __init__(self, color, x, y) :
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.Surface([10,10])
@@ -122,3 +122,26 @@ class Eater1(pygame.sprite.Sprite) :
 		vals = self.network.export_weights()
 		vals.extend(map(lambda x : float(x) / 256, [self.color.r, self.color.g, self.color.b]))
 		return vals
+
+class Eater2(Eater1) :
+	H_DEPTH = 3
+	H_WIDTH = 10
+	I_SIZE = 2
+	def __init__(self, x, y) :
+		Eater1.__init__(self, x, y)
+		self.max_dist = ((SIMULATOR.width ** 2) + (SIMULATOR.height ** 2)) ** 0.5
+
+	def get_net_inp(self) :
+		res = []
+		#res = [float(self.rect.x) / SIMULATOR.width, float(self.rect.y) / SIMULATOR.height]
+		close = self.find_closest(SIMULATOR.food_list)
+		if close == None :
+			res.extend([0, 0])
+		else :
+			res.extend([float(self.rect.x - close.rect.x) / SIMULATOR.width, float(self.rect.y - close.rect.y) / SIMULATOR.height])
+		return res
+		"""
+		for o in SIMULATOR.food_list :
+			res.extend([(float((self.rect.x - o.rect.x) ** 2 + (self.rect.y - o.rect.y) ** 2) ** 0.5) / self.max_dist, 0 if o in self.visited else 1])
+		return res
+		"""

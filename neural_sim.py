@@ -1,4 +1,4 @@
-import random, os, sys, time
+import random, os, sys, time, math
 import pygame
 import traceback
 import genetics
@@ -27,10 +27,10 @@ class NeuralSim :
 		self.tick_count = 0
 		self.tick_count_max = 2000 #when to make a new creature
 		self.gen_count = 0
-		self.num_food = 15
-		self.num_creatures = 50
-		self.tourn_size = 7
-		self.m_rate = 0.005
+		self.num_food = 20
+		self.num_creatures = 100
+		self.tourn_size = 20
+		self.m_rate = 0.0005
 
 		self.font = pygame.font.SysFont("monospace", 12)
 		
@@ -39,10 +39,11 @@ class NeuralSim :
 		self.fps = 0
 		self.last_time = time.time()
 
+		creatures.SIMULATOR = self
+
 		self.food_list = pygame.sprite.Group()
 		self.creature_list = pygame.sprite.Group()
 		self.new_species()
-		creatures.SIMULATOR = self
 
 	def main_loop(self) :
 		self.background = pygame.Surface(self.screen.get_size())
@@ -67,7 +68,8 @@ class NeuralSim :
 
 				self.tick_count += 1
 				if(self.tick_count >= self.tick_count_max) :
-					print 'Generation', self.gen_count, 'Max Fitness:', self.evolve_species()
+					maxFit = self.evolve_species()
+					print 'Generation', self.gen_count, 'Max Fitness:', maxFit, 'Estimated ate:', math.floor(maxFit / (1.5 * self.tick_count_max))
 					self.gen_count += 1
 					self.tick_count = 0
 
@@ -96,7 +98,7 @@ class NeuralSim :
 			self.food_list.add(f)
 		#make some creatures
 		for x in range(0, self.num_creatures) :
-			c = creatures.Eater1(seed_rand.randint(10, self.width - 10), seed_rand.randint(10, self.height - 10))
+			c = creatures.Eater2(seed_rand.randint(10, self.width - 10), seed_rand.randint(10, self.height - 10))
 			c.randomize(seed_rand)
 			self.creature_list.add(c)
 
@@ -108,11 +110,11 @@ class NeuralSim :
 			f = creatures.Food(color, seed_rand.randint(10, self.width - 10), seed_rand.randint(10, self.height - 10))
 			self.food_list.add(f)
 		olds = self.creature_list.sprites()
-		fits = [o.eaten for o in olds]
+		fits = [o.eaten * (1.5 * self.tick_count_max) + o.dist_moved for o in olds]
 		maxFit = max(fits)
 		new_creatures = pygame.sprite.Group()
 		for x in range(0, self.num_creatures) :
-			c = creatures.Eater1(seed_rand.randint(10, self.width - 10), seed_rand.randint(10, self.height - 10))
+			c = creatures.Eater2(seed_rand.randint(10, self.width - 10), seed_rand.randint(10, self.height - 10))
 			ps = []
 			fs = []
 			for y in range(0, self.tourn_size) :
