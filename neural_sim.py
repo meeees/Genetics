@@ -69,7 +69,7 @@ class NeuralSim :
 				self.tick_count += 1
 				if(self.tick_count >= self.tick_count_max) :
 					maxFit = self.evolve_species()
-					print 'Generation', self.gen_count, 'Max Fitness:', maxFit, 'Estimated ate:', math.floor(maxFit / (1.5 * self.tick_count_max))
+					print 'Generation', self.gen_count, 'Max Fitness:', maxFit, 'Estimated ate:', math.ceil(maxFit / (1.5 * self.tick_count_max))
 					self.gen_count += 1
 					self.tick_count = 0
 
@@ -110,7 +110,7 @@ class NeuralSim :
 			f = creatures.Food(color, seed_rand.randint(10, self.width - 10), seed_rand.randint(10, self.height - 10))
 			self.food_list.add(f)
 		olds = self.creature_list.sprites()
-		fits = [o.eaten * (1.5 * self.tick_count_max) + o.dist_moved for o in olds]
+		fits = [o.get_fitness() for o in olds]
 		maxFit = max(fits)
 		new_creatures = pygame.sprite.Group()
 		for x in range(0, self.num_creatures) :

@@ -112,6 +112,8 @@ class Eater1(pygame.sprite.Sprite) :
 			self.rect.y = SIMULATOR.height - self.height
 			self.f_y = float(self.rect.y)
 
+	def get_fitness(self) :
+		return self.eaten * (1.5 * SIMULATOR.tick_count_max) - self.dist_moved
 	#this means we have genetics going on, extract the color data from the last 3 values (it'd be funny if this mutated)
 	def set_genes(self, vals) :
 		self.color = pygame.Color(int(math.fabs(vals[-3]) * 256), int(math.fabs(vals[-2]) * 256), int(math.fabs(vals[-1]) * 256))
