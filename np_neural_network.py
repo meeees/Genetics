@@ -14,6 +14,7 @@ class np_network :
 		self.i_weights = self.scale_random(rand.rand(self.i_size, self.h_size))
 		self.h_weights = np.array([self.scale_random(rand.rand(self.h_size, self.h_size)) for x in range(0, self.h_num - 1)])
 		self.o_weights = self.scale_random(rand.rand(self.h_size, self.o_size))
+
 	def print_network(self) :
 		pass #not entirely sure how to implement this now, maybe not necessary
 
@@ -77,8 +78,8 @@ class np_network :
 #test speed of this network vs original network
 #only concerned with actual propogation time, not the time to generate
 if __name__ == "__main__" :
-	net_np = np_network(30, 10, 2, 2)
-	net_orig = nn.network(30, 10, 2, 2)
+	net_np = np_network(30, 10, 20, 2)
+	net_orig = nn.network(30, 10, 20, 2)
 	net_np.randomize_weights()
 	#lets make them use the same weights because why not
 	net_orig.import_weights(net_np.export_weights())
