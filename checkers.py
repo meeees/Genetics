@@ -14,9 +14,7 @@ bxbxbxbx""".split('\n')
 
 	# the otherteam variable is an int, a bit in the 4 place means black, a bit in the 2 place means white
 
-	def __init__(self, p1 = None, p2 = None) :
-		self.p1 = p1
-		self.p2 = p2
+	def __init__(self) :
 		for i in range(0, len(self.board)) :
 			#2 is a white piece, 3 is a white king, 4 is a black piece, 5 is a black king, 0 is open, -1 is invalid
 			newline = map(lambda c : -1 if c == 'x' else 2 if c == 'w' else 4 if c == 'b' else 0, self.board[i])
@@ -195,14 +193,16 @@ bxbxbxbx""".split('\n')
 					todo = newjumps[random.randrange(len(newjumps))]
 		self.king_check()
 
-	def print_board(self) :
+	def print_board(self, board = None) :
+		if (board == None) :
+			board = self.board
 		print "Checkers Board:"
-		for i in range(0, len(self.board)) : 
-			print '\t'.join(map(lambda c : str(c), self.board[i])) 
+		for i in range(0, len(board)) : 
+			print '\t'.join(map(lambda c : str(c), board[i])) 
 
 
 
-
+#testing that a full game of random checkers can be played
 if __name__ == "__main__" :
 	check = checkers()
 	check.print_board()
