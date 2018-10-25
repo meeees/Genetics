@@ -131,6 +131,7 @@ bxbxbxbx""".split('\n')
 			if(jmp[0] < 0 or jmp[0] > self.bsize - 1 or jmp[1] < 0 or jmp[1] > self.bsize - 1) :
 				raise Exception("Jump goes off the board!")
 			if(self.board[jmp[1]][jmp[0]] & otherteam != otherteam) :
+				print jmp[1], jmp[0], self.board[jmp[1]][jmp[0]], otherteam
 				raise Exception("Jump does not have an enemy piece to jump!")
 			if(newpos[0] < 0 or newpos[0] > self.bsize - 1 or newpos[1] < 0 or newpos[1] > self.bsize - 1) :
 				raise Exception("Jump move goes off the board!")

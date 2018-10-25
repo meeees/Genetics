@@ -14,7 +14,7 @@ class neural_player :
 	def copy_board(self, board) :
 		return [[i for i in row] for row in board]
 
-	#return a list of all the possible board states after each possible move is completed
+	#return a list of all the possible board states after each possible move is completed and True if a jump was made
 	#use this to create inputs for the neural networks
 	#TODO: redo this so it ties the moves done to the board state, this would be trivial except jumps could consist of multiple
 	def calc_move_boards(self, cgame) :
@@ -25,7 +25,7 @@ class neural_player :
 		moves = allmoves[0]
 		#the player can't move
 		if(len(jumps) == 0 and len(moves) == 0) :
-			return None
+			return blist, len(jumps) != 0
 		if(len(jumps) != 0) :
 			for j in jumps :
 				self.calc_jump_boards(cgame, blist, j)
@@ -35,7 +35,7 @@ class neural_player :
 				cgame.do_move(m[0], m[1], m[2], self.oteam)
 				blist.append(self.copy_board(cgame.board))
 				cgame.board = self.copy_board(startstate)
-		return blist
+		return blist, len(jumps) != 0
 
 	#if we are jumping, we want to go through the entire jump, hence the recursion
 	def calc_jump_boards(self, cgame, blist, mv) :
@@ -62,7 +62,7 @@ class neural_player :
 		ind = -1
 		for x in range(0, len(inputs)):
 			test = self.network.prop_input(inputs[x])
-			print test
+			#print test
 			if test > highest :
 				ind = x
 				highest = test
@@ -105,19 +105,57 @@ class neural_player :
 		return inp
 
 
+#return 0 if a draw, 1 if p1 wins, 2 if p2 wins
+def play_game(p1, p2) :
+	cgame = checkers.checkers()
+	p1.p1 = True
+	p1.oteam = 4
+	p2.p1 = False
+	p2.oteam = 2
+	draw_cond = 0
+	while not cgame.over :
+		if(draw_cond >= 40) :
+			return 0, cgame
+		#cgame.print_board()
+		boards = p1.calc_move_boards(cgame)
+		if len(boards[0]) == 0 :
+			cgame.over = True
+			cgame.p2win = True
+			return 2, cgame
+		board = p1.calc_best_board(boards[0])
+		cgame.board = board
+		cgame.king_check()
+		if(boards[1]) :
+			draw_cond = 0
+		else :
+			draw_cond += 1
+		#cgame.print_board()
+		boards = p2.calc_move_boards(cgame)
+		if len(boards[0]) == 0 :
+			cgame.over = True
+			cgame.p1win = True
+			return 1, cgame
+		board = p2.calc_best_board(boards[0])
+		cgame.board = board
+		if(boards[1]) :
+			draw_cond = 0
+		else :
+			draw_cond += 1
+		cgame.king_check()
+
+
+
 #testing that players behave as expected
 if __name__ == '__main__' :
 	p1 = neural_player(True)
 	p2 = neural_player(False)
 	p1.randomize()
 	p2.randomize()
-	cgame = checkers.checkers()
-	boards = p1.calc_move_boards(cgame)
-	board = p1.calc_best_board(boards)
-	cgame.print_board()
-	cgame.board = board
-	cgame.print_board()
-	boards = p2.calc_move_boards(cgame)
-	board = p2.calc_best_board(boards)
-	cgame.board = board
-	cgame.print_board()
+	res = play_game(p1, p2)
+	if(res[0] == 2) :
+		print "Player 2 won!"
+	elif (res[0] == 1) :
+		print "Player 1 won!"
+	else :
+		print "Game ended in a draw!"
+	res[1].print_board()
