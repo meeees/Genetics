@@ -52,13 +52,22 @@ class neural_player :
 
 	#given a list of boards, generate inputs for the neural network
 	#so that the networks don't have to learn both sides of the board, player 2 will rotate their boards by 180 degrees
-	def calculate_best_board(self, blist) :
+	#TODO: when calc_move_boards gets redone, make this reflect the move used
+	def calc_best_board(self, blist) :
 		inputs = []
 		for b in blist :
 			inputs.append(self.generate_input(b))
 		
 		highest = -1
-		for i in inputs :
+		ind = -1
+		for x in range(0, len(inputs)):
+			test = self.network.prop_input(inputs[x])
+			print test
+			if test > highest :
+				ind = x
+				highest = test
+
+		return blist[ind]
 
 
 	#generate the input array for a single board
@@ -95,23 +104,20 @@ class neural_player :
 			inp = inp[::-1]
 		return inp
 
-				
-
-
-
-
-class neural_checkers :
-
-	def __init__(self, p1, p2) :
-		self.p1 = p1
-		self.p2 = p2
-
-
 
 #testing that players behave as expected
 if __name__ == '__main__' :
 	p1 = neural_player(True)
 	p2 = neural_player(False)
+	p1.randomize()
+	p2.randomize()
 	cgame = checkers.checkers()
 	boards = p1.calc_move_boards(cgame)
+	board = p1.calc_best_board(boards)
+	cgame.print_board()
+	cgame.board = board
+	cgame.print_board()
+	boards = p2.calc_move_boards(cgame)
+	board = p2.calc_best_board(boards)
+	cgame.board = board
 	cgame.print_board()
