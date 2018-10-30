@@ -1,5 +1,6 @@
 import checkers
 import np_neural_network as nn_np
+import random
 
 class neural_player :
 
@@ -105,57 +106,95 @@ class neural_player :
 		return inp
 
 
-#return 0 if a draw, 1 if p1 wins, 2 if p2 wins
-def play_game(p1, p2) :
-	cgame = checkers.checkers()
-	p1.p1 = True
-	p1.oteam = 4
-	p2.p1 = False
-	p2.oteam = 2
-	draw_cond = 0
-	while not cgame.over :
-		if(draw_cond >= 40) :
-			return 0, cgame
-		#cgame.print_board()
-		boards = p1.calc_move_boards(cgame)
-		if len(boards[0]) == 0 :
-			cgame.over = True
-			cgame.p2win = True
-			return 2, cgame
-		board = p1.calc_best_board(boards[0])
-		cgame.board = board
-		cgame.king_check()
-		if(boards[1]) :
-			draw_cond = 0
-		else :
-			draw_cond += 1
-		#cgame.print_board()
-		boards = p2.calc_move_boards(cgame)
-		if len(boards[0]) == 0 :
-			cgame.over = True
-			cgame.p1win = True
-			return 1, cgame
-		board = p2.calc_best_board(boards[0])
-		cgame.board = board
-		if(boards[1]) :
-			draw_cond = 0
-		else :
-			draw_cond += 1
-		cgame.king_check()
+class checkers_manager :
 
+	def __init__(self, pcount) :
+		if(pcount % 2 == 1) :
+			print "Please use even numbers for pcount, it makes the tournament easier"
+		plist = []
+		for x in range(0, pcount) :
+			p = neural_player(True)
+			p.randomize()
+			plist.append(p)
+		self.pcount = pcount
+		self.plist = plist
+
+	#each player will face every other player, using the circle algorithm from wikipedia
+	def tournament(self) :
+		list1 = [x for x in range(0, self.pcount / 2)]
+		list2 = [x for x in range(self.pcount / 2, self.pcount)][::-1]
+		scores = [0] * self.pcount
+		rounds = self.pcount - 1
+		for i in range(0, rounds) :
+			for j in range(0, self.pcount / 2) :
+				#randomize sides
+				if(random.random() < 0.5) :
+					p1 = list1[j]
+					p2 = list2[j]
+				else :
+					p1 = list2[j]
+					p2 = list1[j]
+				res = self.play_game(self.plist[p1], self.plist[p2])
+				if(res[0] == 1) :
+					scores[p1] += 1
+					scores[p2] -= 1
+				elif (res[0] == 2) :
+					scores[p1] -= 1
+					scores[p2] += 1
+
+			list2.append(list1[-1])
+			del list1[-1]
+			list1.insert(1, list2[0])
+			del list2[0]
+
+		return scores
+
+
+
+
+	def run_generation() :
+		pass
+
+	#return 0 if a draw, 1 if p1 wins, 2 if p2 wins
+	def play_game(self, p1, p2) :
+		cgame = checkers.checkers()
+		p1.p1 = True
+		p1.oteam = 4
+		p2.p1 = False
+		p2.oteam = 2
+		draw_cond = 0
+		while not cgame.over :
+			if(draw_cond >= 40) :
+				return 0, cgame
+			#cgame.print_board()
+			boards = p1.calc_move_boards(cgame)
+			if len(boards[0]) == 0 :
+				cgame.over = True
+				cgame.p2win = True
+				return 2, cgame
+			board = p1.calc_best_board(boards[0])
+			cgame.board = board
+			cgame.king_check()
+			if(boards[1]) :
+				draw_cond = 0
+			else :
+				draw_cond += 1
+			#cgame.print_board()
+			boards = p2.calc_move_boards(cgame)
+			if len(boards[0]) == 0 :
+				cgame.over = True
+				cgame.p1win = True
+				return 1, cgame
+			board = p2.calc_best_board(boards[0])
+			cgame.board = board
+			if(boards[1]) :
+				draw_cond = 0
+			else :
+				draw_cond += 1
+			cgame.king_check()
 
 
 #testing that players behave as expected
 if __name__ == '__main__' :
-	p1 = neural_player(True)
-	p2 = neural_player(False)
-	p1.randomize()
-	p2.randomize()
-	res = play_game(p1, p2)
-	if(res[0] == 2) :
-		print "Player 2 won!"
-	elif (res[0] == 1) :
-		print "Player 1 won!"
-	else :
-		print "Game ended in a draw!"
-	res[1].print_board()
+	CM = checkers_manager(200)
+	print CM.tournament()
