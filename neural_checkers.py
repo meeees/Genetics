@@ -1,3 +1,4 @@
+import numpy as np
 import checkers
 import np_neural_network as nn_np
 import random
@@ -9,11 +10,17 @@ class neural_player :
 		self.oteam = 4 if p1 else 2
 		self.network = nn_np.np_network(32, 20, 1, 2)
 
-	def randomize(self) :
-		self.network.randomize_weights()
+	def randomize(self, rand = np.random) :
+		self.network.randomize_weights(rand)
 
 	def copy_board(self, board) :
 		return [[i for i in row] for row in board]
+
+	def get_genes(self) :
+		return self.network.export_weights()
+
+	def set_network(self, weights) :
+		self.network.import_weights(weights)
 
 	#return a list of all the possible board states after each possible move is completed and True if a jump was made
 	#use this to create inputs for the neural networks
@@ -108,14 +115,15 @@ class neural_player :
 
 class checkers_manager :
 
-	def __init__(self, pcount) :
+	def __init__(self, pcount, rand, plist = None) :
 		if(pcount % 2 == 1) :
 			print "Please use even numbers for pcount, it makes the tournament easier"
-		plist = []
-		for x in range(0, pcount) :
-			p = neural_player(True)
-			p.randomize()
-			plist.append(p)
+		if(plist == None) :
+			plist = []
+			for x in range(0, pcount) :
+				p = neural_player(True)
+				p.randomize(rand)
+				plist.append(p)
 		self.pcount = pcount
 		self.plist = plist
 
@@ -149,12 +157,6 @@ class checkers_manager :
 
 		return scores
 
-
-
-
-	def run_generation() :
-		pass
-
 	#return 0 if a draw, 1 if p1 wins, 2 if p2 wins
 	def play_game(self, p1, p2) :
 		cgame = checkers.checkers()
@@ -183,6 +185,7 @@ class checkers_manager :
 			boards = p2.calc_move_boards(cgame)
 			if len(boards[0]) == 0 :
 				cgame.over = True
+		
 				cgame.p1win = True
 				return 1, cgame
 			board = p2.calc_best_board(boards[0])
@@ -197,4 +200,4 @@ class checkers_manager :
 #testing that players behave as expected
 if __name__ == '__main__' :
 	CM = checkers_manager(200)
-	print CM.tournament()
+	print CM.tournament()	
