@@ -12,4 +12,3 @@ The individuals are breeding using a tournament system, and exclude any members 
 neural_sim.py Information:
 
 trying to apply neural networks to the genetic algorithms, going to go with a different situation to test the networks so writing a new simulator.
-
