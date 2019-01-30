@@ -3,7 +3,7 @@ import random
 class checkers :
 
 
-	board = """xwxwxwxw
+	init_board = """xwxwxwxw
 wxwxwxwx
 xwxwxwxw
 oxoxoxox
@@ -15,9 +15,10 @@ bxbxbxbx""".split('\n')
 	# the otherteam variable is an int, a bit in the 4 place means black, a bit in the 2 place means white
 
 	def __init__(self) :
-		for i in range(0, len(self.board)) :
+		self.board = [[0 for x in range(0, 8)] for y in range(0, 8)]
+		for i in range(0, len(self.init_board)) :
 			#2 is a white piece, 3 is a white king, 4 is a black piece, 5 is a black king, 0 is open, -1 is invalid
-			newline = map(lambda c : -1 if c == 'x' else 2 if c == 'w' else 4 if c == 'b' else 0, self.board[i])
+			newline = map(lambda c : -1 if c == 'x' else 2 if c == 'w' else 4 if c == 'b' else 0, self.init_board[i])
 			self.board[i] = newline
 		self.bsize = len(self.board)
 		self.over = False

@@ -134,6 +134,7 @@ class checkers_manager :
 		scores = [0] * self.pcount
 		rounds = self.pcount - 1
 		for i in range(0, rounds) :
+			print rounds - i
 			for j in range(0, self.pcount / 2) :
 				#randomize sides
 				if(random.random() < 0.5) :
@@ -149,6 +150,8 @@ class checkers_manager :
 				elif (res[0] == 2) :
 					scores[p1] -= 1
 					scores[p2] += 1
+				if(i == 0 and j == 1) :
+					res[1].print_board()
 
 			list2.append(list1[-1])
 			del list1[-1]
@@ -157,8 +160,9 @@ class checkers_manager :
 
 		return scores
 
+	@staticmethod
 	#return 0 if a draw, 1 if p1 wins, 2 if p2 wins
-	def play_game(self, p1, p2) :
+	def play_game(p1, p2) :
 		cgame = checkers.checkers()
 		p1.p1 = True
 		p1.oteam = 4
@@ -199,5 +203,5 @@ class checkers_manager :
 
 #testing that players behave as expected
 if __name__ == '__main__' :
-	CM = checkers_manager(200)
+	CM = checkers_manager(200, np.random)
 	print CM.tournament()	
