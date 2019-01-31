@@ -1,8 +1,7 @@
 import numpy as np
 import genetics
 from neural_checkers import neural_player, checkers_manager
-from checkers import checkers
-
+import pickle
 class checkers_sim :
 
 	def __init__(self, pcount, mrate, rand = np.random) :
@@ -36,6 +35,7 @@ class checkers_sim :
 		scores = None
 		players = None
 		first_gen = None
+		first_winner = -1
 		for x in range(0, gen_count) :
 			print "Starting generation", x + 1
 			# case for first run
@@ -46,33 +46,49 @@ class checkers_sim :
 			else :
 				cur_gen.plist = self.breed_checkers(players, scores)
 			players = cur_gen.plist
-			scores = cur_gen.tournament()
-			print "std dev: %f, min: %d, max: %d" % (np.std(scores), np.min(scores), np.max(scores))
+			scores = cur_gen.bracket_tournament()
+			#save the index of the winner in the first gen
+			if x == 0 :
+				first_winner = scores.index(np.floor(np.log2(self.pcount)))
+				print first_winner
 
+		last_winner = scores.index(np.floor(np.log2(self.pcount)))
+
+		#too look for improvement, the winner of the first and last generation will face everyone in the first and last generation
 		print "Beginning first gen vs last gen"
-		res = checkers_manager.play_game(players[0], first_gen[0])
-		res[1].print_board()
-		final_scores = [0] * len(players)
-		for x in range(0, len(players)) :
-			for y in range(0, len(first_gen)) :
-				if(self.rand.randint(0, 1) == 0) :
-					res = checkers_manager.play_game(players[x], first_gen[y])[0]
-					if(res == 1) :
-						final_scores[x] += 1
-					elif (res == 2) :
-						final_scores[x] -= 1
-				else :
-					res = checkers_manager.play_game(first_gen[y], players[x])[0]
-					if(res == 2) :
-						final_scores[x] += 1
-					elif (res == 1) :
-						final_scores[x] -= 1
-		print "Average score: %f, min: %d, max: %d" % (np.mean(final_scores), np.min(final_scores), np.max(final_scores))
+		fvf = 0
+		fvl = 0
+		lvf = 0
+		lvl = 0
+		fw = first_gen[first_winner]
+		lw = players[last_winner]
+		for x in range(0, self.pcount) :
+			#ignore sides becuase I'm being lazy, potentially add sides to this later for more consistency
+			if(x != first_winner) :
+				fvf += 1 if checkers_manager.play_game(fw, first_gen[x])[0] == 1 else 0
+			fvl += 1 if checkers_manager.play_game(fw, players[x])[0] == 1 else 0
+			if(x != last_winner) :
+				lvl += 1 if checkers_manager.play_game(lw, players[x])[0] == 1 else 0
+			lvf += 1 if checkers_manager.play_game(lw, first_gen[x])[0] == 1 else 0
+
+		print "Final win counts:"
+		print "First Winner vs First:", fvf
+		print "First Winner vs Last:", fvl
+		print "Last Winner vs First:", lvf
+		print "Last Winner vs Last:", lvl
+
+		return players
 
 
 
+def output_all(players, path) :
+	fo = open(path, 'wb')
+	for x in range(0, len(players)) :
+		pickle.dump(players[x].get_genes(), fo)
+	fo.close()
 
 if __name__ == '__main__' :
 
-	sim = checkers_sim(200, 0.001)
-	sim.run_for_generations(2)
+	sim = checkers_sim(512, 0.001)
+	players = sim.run_for_generations(300)
+	output_all(players, '40x2_512_300_player_genes_2.txt')

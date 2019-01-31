@@ -8,7 +8,7 @@ class neural_player :
 	def __init__(self, p1) :
 		self.p1 = p1
 		self.oteam = 4 if p1 else 2
-		self.network = nn_np.np_network(32, 20, 1, 2)
+		self.network = nn_np.np_network(32, 40, 1, 2)
 
 	def randomize(self, rand = np.random) :
 		self.network.randomize_weights(rand)
@@ -116,8 +116,6 @@ class neural_player :
 class checkers_manager :
 
 	def __init__(self, pcount, rand, plist = None) :
-		if(pcount % 2 == 1) :
-			print "Please use even numbers for pcount, it makes the tournament easier"
 		if(plist == None) :
 			plist = []
 			for x in range(0, pcount) :
@@ -126,15 +124,85 @@ class checkers_manager :
 				plist.append(p)
 		self.pcount = pcount
 		self.plist = plist
+		self.rand = rand
 
+	#all the players will go through a single elimination bracket, each win adds to their fitness
+	def bracket_tournament(self) :
+		list1 = [x for x in range(0, self.pcount / 2)]
+		list2 = [x for x in range(self.pcount / 2, self.pcount)]
+		scores = [0] * self.pcount
+		over = False
+
+		while not over :
+			#print len(list1), list1
+			print len(list1)
+			#print len(list2), list2
+			next_count = 0
+			list1_len = len(list1)
+			list2_len = len(list2)
+			if list1_len == list2_len and list1_len == 1 :
+				over = True
+			next_target = list2_len / 2
+			next_1 = []
+			next_2 = []
+			#if one list is longer than the other, the remaining member will auto-advance
+			#list 2 is the only one that could end up longer so we will go that far
+			for x in range(0, len(list2)) : 
+				if x >= list1_len :
+					next_2.append(list2[x])
+				else :
+					p1 = self.plist[list1[x]]
+					p2 = self.plist[list2[x]]
+					winner = -1
+
+					#in the case of a tie, they will swap sides and play again, if there is a still a tie a random winner will be chosen
+					if self.rand.randint(0, 1) == 0 :
+						res = self.play_game(p1, p2)
+						if(res[0] == 1) :
+							winner = list1[x]
+						elif res[1] == 2 :
+							winner = list2[x]
+						else :
+							res = self.play_game(p2, p1)
+							if res[0] == 1 :
+								winner = list2[x]
+							elif res[1] == 2 :
+								winner = list1[x]
+							else :
+								winner = list1[x] if self.rand.randint(0, 1) == 0 else list2[x]
+					else :
+						res = self.play_game(p2, p1)
+						if(res[0] == 1) :
+							winner = list2[x]
+						elif res[0] == 2 :
+							winner = list1[x]
+						else :
+							res = self.play_game(p1, p2)
+							if res[0] == 1 :
+								winner = list1[x]
+							elif res[0] == 2 :
+								winner = list2[x]
+							else :
+								winner = list1[x] if self.rand.randint(0, 1) == 0 else list2[x]
+					scores[winner] += 1
+					if next_count < next_target :
+						next_1.append(winner)
+						next_count += 1
+					else :
+						next_2.append(winner)
+
+			list1 = next_1
+			list2 = next_2
+		return scores
+
+	#this takes too long for populations > 50, so the single elimination bracket will be used instead for the training
 	#each player will face every other player, using the circle algorithm from wikipedia
-	def tournament(self) :
+	def circle_tournament(self) :
 		list1 = [x for x in range(0, self.pcount / 2)]
 		list2 = [x for x in range(self.pcount / 2, self.pcount)][::-1]
 		scores = [0] * self.pcount
 		rounds = self.pcount - 1
 		for i in range(0, rounds) :
-			print rounds - i
 			for j in range(0, self.pcount / 2) :
 				#randomize sides
 				if(random.random() < 0.5) :
@@ -203,5 +271,5 @@ class checkers_manager :
 
 #testing that players behave as expected
 if __name__ == '__main__' :
-	CM = checkers_manager(200, np.random)
-	print CM.tournament()	
+	CM = checkers_manager(100, np.random)
+	print CM.bracket_tournament()	
