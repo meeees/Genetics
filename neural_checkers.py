@@ -5,10 +5,10 @@ import random
 
 class neural_player :
 
-	def __init__(self, p1) :
+	def __init__(self, p1, hn = 40, hl = 1) :
 		self.p1 = p1
 		self.oteam = 4 if p1 else 2
-		self.network = nn_np.np_network(32, 40, 1, 2)
+		self.network = nn_np.np_network(32, hn, 1, hl)
 
 	def randomize(self, rand = np.random) :
 		self.network.randomize_weights(rand)

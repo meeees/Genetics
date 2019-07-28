@@ -3,6 +3,7 @@ import sys
 import traceback
 import checkers
 from neural_checkers import checkers_manager, neural_player
+import pickle
 
 class CheckersRenderer :
     # checkers_net is a np_neural_network that will be playing on this board
@@ -21,10 +22,14 @@ class CheckersRenderer :
         self.background = self.background.convert()
         self.background.fill((0, 0, 0))
 
-        #cgame setup
-        self.player1 = neural_player(True)
+        # cgame setup
+        #genes1, genes2 = self.load_players('saved_runs/40x2_512_500_player_genes_2.txt')
+        # currently using networks with 2 hidden layers of 40 neurons each
+        self.player1 = neural_player(True, 40, 2)
+        #self.player1.set_network(genes1)
         self.player1.randomize()
-        self.player2 = neural_player(False)
+        self.player2 = neural_player(False, 40, 2)
+        #self.player2.set_network(genes2)
         self.player2.randomize()
         self.c_game = checkers_manager.setup_game(self.player1, self.player2)
         self.p1_turn = True
@@ -116,7 +121,12 @@ class CheckersRenderer :
             k_t = self.k_font.render("K", False, pygame.Color('#bfbfbf'))
             board.blit(k_t, (x_pos + width / 4, y_pos + width / 4))
 
-
+    def load_players(self, path) :
+        inp = open(path, 'rb')
+        genes1 = pickle.load(inp)
+        genes2 = pickle.load(inp)
+        inp.close()
+        return genes1, genes2
 
         
 
