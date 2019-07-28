@@ -231,14 +231,10 @@ class checkers_manager :
 	@staticmethod
 	#return 0 if a draw, 1 if p1 wins, 2 if p2 wins
 	def play_game(p1, p2) :
-		cgame = checkers.checkers()
-		p1.p1 = True
-		p1.oteam = 4
-		p2.p1 = False
-		p2.oteam = 2
-		draw_cond = 0
+		# TODO: consolidate with step_game
+		cgame = checkers_manager.setup_game(p1, p2)
 		while not cgame.over :
-			if(draw_cond >= 40) :
+			if(cgame.draw_cond >= 40) :
 				return 0, cgame
 			#cgame.print_board()
 			boards = p1.calc_move_boards(cgame)
@@ -250,9 +246,9 @@ class checkers_manager :
 			cgame.board = board
 			cgame.king_check()
 			if(boards[1]) :
-				draw_cond = 0
+				cgame.draw_cond = 0
 			else :
-				draw_cond += 1
+				cgame.draw_cond += 1
 			#cgame.print_board()
 			boards = p2.calc_move_boards(cgame)
 			if len(boards[0]) == 0 :
@@ -263,10 +259,58 @@ class checkers_manager :
 			board = p2.calc_best_board(boards[0])
 			cgame.board = board
 			if(boards[1]) :
-				draw_cond = 0
+				cgame.draw_cond = 0
 			else :
-				draw_cond += 1
+				cgame.draw_cond += 1
 			cgame.king_check()
+
+	@staticmethod
+	def setup_game(p1, p2) :
+		p1.p1 = True
+		p1.oteam = 4
+		p2.p1 = False
+		p2.oteam = 2
+		cgame = checkers.checkers()
+		cgame.draw_cond = 0
+		return cgame
+
+	@staticmethod
+	#return 0 if a draw, 1 if p1 wins, 2 if p2 wins
+	def step_game(cgame, p1, p2, p1_turn) :
+		if not cgame.over :
+			if(cgame.draw_cond >= 40) :
+				return 0, cgame
+			if p1_turn :
+			#cgame.print_board()
+				boards = p1.calc_move_boards(cgame)
+				if len(boards[0]) == 0 :
+					cgame.over = True
+					cgame.p2win = True
+					return 2, cgame
+				board = p1.calc_best_board(boards[0])
+				cgame.board = board
+				cgame.king_check()
+				if(boards[1]) :
+					cgame.draw_cond = 0
+				else :
+					cgame.draw_cond += 1
+			else :
+				#cgame.print_board()
+				boards = p2.calc_move_boards(cgame)
+				if len(boards[0]) == 0 :
+					cgame.over = True
+			
+					cgame.p1win = True
+					return 1, cgame
+				board = p2.calc_best_board(boards[0])
+				cgame.board = board
+				if(boards[1]) :
+					cgame.draw_cond = 0
+				else :
+					cgame.draw_cond += 1
+				cgame.king_check()
+		return None
+
 
 
 #testing that players behave as expected

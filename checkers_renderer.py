@@ -2,11 +2,13 @@ import pygame
 import sys
 import traceback
 import checkers
+from neural_checkers import checkers_manager, neural_player
 
 class CheckersRenderer :
     # checkers_net is a np_neural_network that will be playing on this board
     def __init__(self, checkers_net, width=640, height=480) :
         pygame.init()
+        pygame.font.init()
 
         self.width = width
         self.height = height
@@ -19,7 +21,18 @@ class CheckersRenderer :
         self.background = self.background.convert()
         self.background.fill((0, 0, 0))
 
-        self.c_game = checkers.checkers()
+        #cgame setup
+        self.player1 = neural_player(True)
+        self.player1.randomize()
+        self.player2 = neural_player(False)
+        self.player2.randomize()
+        self.c_game = checkers_manager.setup_game(self.player1, self.player2)
+        self.p1_turn = True
+
+        #button setup
+        self.font = pygame.font.SysFont('Consolas', 16)
+        self.buttons = []
+        self.buttons.append((pygame.Rect(self.width / 2 - 40, self.height / 8 * 7 + 15, 60, 30), 'Step'))
 
 # main loop: wait for player input, then feed new board to network
     def main_loop(self) :
@@ -30,6 +43,8 @@ class CheckersRenderer :
                     if event.type == pygame.QUIT :
                         pygame.quit()
                         sys.exit()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        self.handle_mouse_press()
                 self.render()
         except Exception as e:
             print 'exited due to ', sys.exc_info()[0]
@@ -42,7 +57,24 @@ class CheckersRenderer :
         x_off = (self.width - (self.height / 4 * 3)) / 2 
         self.screen.blit(self.background, (0, 0))
         self.screen.blit(self.render_board(self.c_game.board), (x_off, self.height / 8))
+        for b in self.buttons :
+            # Todo: draw prettier buttons
+            label = self.font.render(b[1], False, pygame.Color('#0e0e0e'))
+            pygame.draw.rect(self.screen, pygame.Color('#7f7f7f'), b[0])
+            self.screen.blit(label, (b[0][0], b[0][1]))
+
         pygame.display.flip()
+
+    def handle_mouse_press(self) :
+        mouse_pos = pygame.mouse.get_pos()
+        for b in self.buttons :
+            if b[0].collidepoint(mouse_pos) :
+                self.handle_button(b)
+
+    def handle_button(self, b) :
+        if b[1] == "Step" :
+            checkers_manager.step_game(self.c_game, self.player1, self.player2, self.p1_turn)
+            self.p1_turn = not self.p1_turn
 
 #returns a board surface
     def render_board(self, c_board) :
