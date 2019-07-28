@@ -56,26 +56,43 @@ class checkers_sim :
 
 		#too look for improvement, the winner of the first and last generation will face everyone in the first and last generation
 		print "Beginning first gen vs last gen"
-		fvf = 0
-		fvl = 0
-		lvf = 0
-		lvl = 0
+		fvf = (0, 0)
+		fvl = (0, 0)
+		lvf = (0, 0)
+		lvl = (0, 0)
 		fw = first_gen[first_winner]
 		lw = players[last_winner]
 		for x in range(0, self.pcount) :
 			#ignore sides becuase I'm being lazy, potentially add sides to this later for more consistency
 			if(x != first_winner) :
-				fvf += 1 if checkers_manager.play_game(fw, first_gen[x])[0] == 1 else 0
-			fvl += 1 if checkers_manager.play_game(fw, players[x])[0] == 1 else 0
-			if(x != last_winner) :
-				lvl += 1 if checkers_manager.play_game(lw, players[x])[0] == 1 else 0
-			lvf += 1 if checkers_manager.play_game(lw, first_gen[x])[0] == 1 else 0
+				res = checkers_manager.play_game(fw, first_gen[x])[0]
+				if res == 1 :
+					fvf[0] += 1
+				elif res == 0 :
+					fvf[1] += 1
 
-		print "Final win counts:"
-		print "First Winner vs First:", fvf
-		print "First Winner vs Last:", fvl
-		print "Last Winner vs First:", lvf
-		print "Last Winner vs Last:", lvl
+			res = checkers_manager.play_game(fw, players[x])[0]
+			if res == 1 :
+				fvl[0] += 1
+			elif res == 0 :
+				fvl[1] += 1
+			if(x != last_winner) :
+				res = checkers_manager.play_game(lw, players[x])[0]
+				if res == 1 :
+					lvl[0] += 1
+				elif res == 0:
+					lvl[1] += 1
+			res = checkers_manager.play_game(lw, first_gen[x])[0]
+			if res == 1 :
+				lvf[0] += 1
+			elif res == 0 :
+				lvf[1] += 1
+
+		print "Final W/L/T :"
+		print "First Winner vs First: {0}/{1}/{2}".format(fvf[0], self.pcount - fvf[0] - fvf[1], fvf[1])
+		print "First Winner vs Last: {0}/{1}/{2}".format(fvl[0], self.pcount - fvl[0] - fvl[1], fvl[1])
+		print "Last Winner vs First: {0}/{1}/{2}".format(lvf[0], self.pcount - lvf[0] - lvf[1], lvf[1])
+		print "Last Winner vs Last: {0}/{1}/{2}".format(lvl[0], self.pcount - lvl[0] - lvl[1], lvl[1])
 
 		return players
 
@@ -89,6 +106,6 @@ def output_all(players, path) :
 
 if __name__ == '__main__' :
 
-	sim = checkers_sim(512, 0.001)
-	players = sim.run_for_generations(300)
+	sim = checkers_sim(128, 0.001)
+	players = sim.run_for_generations(100)
 	output_all(players, '40x2_512_300_player_genes_2.txt')
