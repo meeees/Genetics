@@ -30,7 +30,8 @@ class CheckersRenderer :
         self.p1_turn = True
 
         #button setup
-        self.font = pygame.font.SysFont('Consolas', 16)
+        self.b_font = pygame.font.SysFont('Consolas', 20)
+        self.k_font = pygame.font.SysFont('Consolas', 32)
         self.buttons = []
         self.buttons.append((pygame.Rect(self.width / 2 - 40, self.height / 8 * 7 + 15, 60, 30), 'Step'))
 
@@ -59,7 +60,7 @@ class CheckersRenderer :
         self.screen.blit(self.render_board(self.c_game.board), (x_off, self.height / 8))
         for b in self.buttons :
             # Todo: draw prettier buttons
-            label = self.font.render(b[1], False, pygame.Color('#0e0e0e'))
+            label = self.b_font.render(b[1], False, pygame.Color('#0e0e0e'))
             pygame.draw.rect(self.screen, pygame.Color('#7f7f7f'), b[0])
             self.screen.blit(label, (b[0][0], b[0][1]))
 
@@ -106,9 +107,14 @@ class CheckersRenderer :
         draw_at = (int(round(x_pos + width / 2)), int(round(y_pos + width / 2)))
         pygame.draw.circle(board, color, draw_at, int(round(width / 2)), 0)
         pygame.draw.circle(board, pygame.Color('#dfdfdf'), draw_at, int(round(width / 2)), 1)
-        # king
-        if type == 3 or type == 5 :
-            pass
+        # white king
+        if type == 3 :
+            k_t = self.k_font.render("K", False, pygame.Color('#1e1e1e'))
+            board.blit(k_t, (x_pos + width / 4, y_pos + width / 4))
+        # black king
+        if type == 5 :
+            k_t = self.k_font.render("K", False, pygame.Color('#bfbfbf'))
+            board.blit(k_t, (x_pos + width / 4, y_pos + width / 4))
 
 
 
