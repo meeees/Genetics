@@ -249,8 +249,12 @@ class checkers_manager :
 		cgame = checkers_manager.setup_game(p1, p2)
 		if p1.recurrent :
 			p1.network.reset_last()
+			# setup last state as a full board
+			p1.network.prop_input(p1.generate_input(cgame.board))
 		if p2.recurrent :
 			p2.network.reset_last()
+			# setup last state as a full board
+			p2.network.prop_input(p2.generate_input(cgame.board))
 		while not cgame.over :
 			if(cgame.draw_cond >= 40) :
 				return 0, cgame

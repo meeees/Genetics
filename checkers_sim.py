@@ -106,6 +106,6 @@ def output_all(players, path) :
 
 if __name__ == '__main__' :
 
-	sim = checkers_sim(256, 0.001)
-	players = sim.run_for_generations(100)
-	#output_all(players, 'recurrent_512p_100g_genes.txt')
+	sim = checkers_sim(512, 0.001)
+	players = sim.run_for_generations(200)
+	#output_all(players, 'recurrent_512p_200g_genes.txt')
