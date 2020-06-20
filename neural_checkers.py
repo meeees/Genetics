@@ -1,14 +1,18 @@
 import numpy as np
 import checkers
 import np_neural_network as nn_np
+import np_recurrent_network as rn_np
 import random
 
 class neural_player :
 
-	def __init__(self, p1, hn = 40, hl = 1) :
+	def __init__(self, p1, hn = 40, hl = 4) :
 		self.p1 = p1
 		self.oteam = 4 if p1 else 2
-		self.network = nn_np.np_network(32, hn, 1, hl)
+		# self.network = nn_np.np_network(32, hn, 1, hl)
+		# now with recurrent networks
+		self.recurrent = True
+		self.network = rn_np.np_recurrent_network(32, hn, 1)
 
 	def randomize(self, rand = np.random) :
 		self.network.randomize_weights(rand)
@@ -68,13 +72,23 @@ class neural_player :
 		
 		highest = -1
 		ind = -1
+
+
 		for x in range(0, len(inputs)):
-			test = self.network.prop_input(inputs[x])
+			if self.recurrent :
+				test = self.network.prop_input(inputs[x], False)
+			else :
+				test = self.network.prop_input(inputs[x])
+
 			#print test
 			if test > highest :
 				ind = x
 				highest = test
+				if self.recurrent :
+					highest_last_state = self.network.tmp_last_state
 
+		if self.recurrent :
+			self.network.set_last_state(highest_last_state)
 		return blist[ind]
 
 
@@ -233,10 +247,16 @@ class checkers_manager :
 	def play_game(p1, p2) :
 		# TODO: consolidate with step_game
 		cgame = checkers_manager.setup_game(p1, p2)
+		if p1.recurrent :
+			p1.network.reset_last()
+		if p2.recurrent :
+			p2.network.reset_last()
 		while not cgame.over :
 			if(cgame.draw_cond >= 40) :
 				return 0, cgame
 			#cgame.print_board()
+
+			# player 1
 			boards = p1.calc_move_boards(cgame)
 			if len(boards[0]) == 0 :
 				cgame.over = True
@@ -250,10 +270,14 @@ class checkers_manager :
 			else :
 				cgame.draw_cond += 1
 			#cgame.print_board()
+			
+			if p2.recurrent :
+				p2.network.prop_input(p2.generate_input(cgame.board))
+
+			# player 2
 			boards = p2.calc_move_boards(cgame)
 			if len(boards[0]) == 0 :
 				cgame.over = True
-		
 				cgame.p1win = True
 				return 1, cgame
 			board = p2.calc_best_board(boards[0])
@@ -263,6 +287,9 @@ class checkers_manager :
 			else :
 				cgame.draw_cond += 1
 			cgame.king_check()
+
+			if p1.recurrent :
+				p1.network.prop_input(p1.generate_input(cgame.board))
 
 	@staticmethod
 	def setup_game(p1, p2) :
@@ -294,6 +321,9 @@ class checkers_manager :
 					cgame.draw_cond = 0
 				else :
 					cgame.draw_cond += 1
+
+				if p2.recurrent :
+					p2.network.prop_input(p2.generate_input(cgame.board))
 			else :
 				#cgame.print_board()
 				boards = p2.calc_move_boards(cgame)
@@ -309,6 +339,9 @@ class checkers_manager :
 				else :
 					cgame.draw_cond += 1
 				cgame.king_check()
+
+				if p1.recurrent :
+					p1.network.prop_input(p1.generate_input(cgame.board))
 		return None
 
 

@@ -56,10 +56,10 @@ class checkers_sim :
 
 		#too look for improvement, the winner of the first and last generation will face everyone in the first and last generation
 		print "Beginning first gen vs last gen"
-		fvf = (0, 0)
-		fvl = (0, 0)
-		lvf = (0, 0)
-		lvl = (0, 0)
+		fvf = [0, 0]
+		fvl = [0, 0]
+		lvf = [0, 0]
+		lvl = [0, 0]
 		fw = first_gen[first_winner]
 		lw = players[last_winner]
 		for x in range(0, self.pcount) :
@@ -106,6 +106,6 @@ def output_all(players, path) :
 
 if __name__ == '__main__' :
 
-	sim = checkers_sim(128, 0.001)
+	sim = checkers_sim(256, 0.001)
 	players = sim.run_for_generations(100)
-	output_all(players, '40x2_512_300_player_genes_2.txt')
+	#output_all(players, 'recurrent_512p_100g_genes.txt')

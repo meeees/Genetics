@@ -3,6 +3,7 @@ import neural_network as nn
 import time, random
 
 class np_network :
+	# inputs, hiddens, outputs, hiddenLayerCount
 	def __init__(self, iS, hS, oS, hLs = 1) :
 		self.i_size = iS
 		self.h_size = hS
@@ -53,6 +54,7 @@ class np_network :
 		val = val * 2 - 1
 		return val
 
+	# the structure of the weights export is [inputs, hiddens, outputs]
 	def export_weights(self) :
 		res = []
 		for i in self.i_weights :
@@ -65,16 +67,19 @@ class np_network :
 			res.extend(o.tolist())
 		return res
 
+	
+	def get_network_size(self) :
+		return self.i_size * self.h_size + self.h_size * self.o_size + self.h_size * self.h_size * (self.h_num - 1)
+
 	def import_weights(self, vals) :
-		if len(vals) != self.i_size * self.h_size + self.h_size * self.o_size + self.h_size * self.h_size * (self.h_num - 1) :
-			print 'Input weights length', len(vals), 'was mismatched to network size', self.i_size * self.h_size + self.h_size * self.o_size + self.h_size * self.h_size * (self.h_num - 1)
-			return
+		if len(vals) != self.get_network_size():
+			raise Exception('Input weights length', len(vals), 'was mismatched to network size', self.get_network_size())
 		self.i_weights = np.array([vals[x:x+self.h_size] for x in range(0, self.i_size * self.h_size, self.h_size)])
 		vals = vals[self.i_size*self.h_size:]
 		self.h_weights = np.array([[vals[y * self.h_size * self.h_size + x:y * self.h_size * self.h_size + x+self.h_size]  for x in range(0, self.h_size * self.h_size, self.h_size)] for y in range(0, self.h_num - 1)])
 		vals = vals[self.h_size * self.h_size * (self.h_num - 1):]
 		self.o_weights = np.array([vals[x:x+ self.o_size] for x in range(0, self.h_size * self.o_size, self.o_size)])
-
+		
 #test speed of this network vs original network
 #only concerned with actual propogation time, not the time to generate
 if __name__ == "__main__" :
